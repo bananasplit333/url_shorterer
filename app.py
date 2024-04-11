@@ -1,23 +1,35 @@
 from flask import Flask, request, redirect
 from threading import Lock
-from database import create_connection, create_table, insert_url, get_url, update_click_count
-from url_shortener import generate_short_code
+from database.db import create_connection, create_table, insert_url, get_url, update_click_count
+from utils.url_shortener import generate_short_code
 
 app = Flask(__name__)
 MAX_CLICKS = 3000
 db_lock = Lock()
 
+@app.route('/')
+def home():
+    return
+
 @app.route('/shorten_link', methods=['POST'])
 def shorten_url():
     original_url = request.form['url']
+    print(f'url inserted: {original_url}')
     short_code = generate_short_code()
+
     with db_lock:
         conn = create_connection()
-        insert_url(conn, original_url, short_code)
-    short_url = request.host_url + short_code
+        result = get_url(conn, original_url)
+        if result:
+            return "URL already exists", 403
+        else:
+            insert_url(conn, original_url, short_code)
+
+    short_url = 'https://jaehyon.ca/' + short_code
+    print("short url inserted")
     return short_url
 
-@app.route('/<short_code>')
+@app.route('/<short_code>', methods=['GET'])
 def redirect_url(short_code):
     with db_lock:
         conn = create_connection()
