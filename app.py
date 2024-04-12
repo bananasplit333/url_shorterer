@@ -1,3 +1,4 @@
+from urllib.parse import urljoin
 from flask import Flask, request, redirect 
 from flask_cors import CORS
 from threading import Lock
@@ -28,15 +29,16 @@ def shorten_url():
         else:
             insert_url(conn, original_url, short_code)
 
-    short_url = 'https://jaehyon.ca/' + short_code
+    short_url = urljoin(request.host_url + short_code)
     print("short url inserted")
     return short_url
 
 @app.route('/<short_code>', methods=['GET'])
 def redirect_url(short_code):
+    print('GET REQUEST')
     with db_lock:
         conn = create_connection()
-        result = get_url(conn, short_code)
+        result = get_url(conn, short_code=short_code)  # Pass short_code as a keyword argument
         if result:
             original_url, click_count = result
             if click_count >= MAX_CLICKS:

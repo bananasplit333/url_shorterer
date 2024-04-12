@@ -19,9 +19,11 @@ def insert_url(conn, original_url, short_code):
     conn.commit()
 
 def get_url(conn, short_code):
-    c = conn.cursor()
-    c.execute("SELECT original_url, click_count FROM urls WHERE short_code = ?", (short_code,))
-    return c.fetchone()
+    cur = conn.cursor()
+    cur.execute("SELECT original_url, click_count FROM urls WHERE short_code=?", (short_code,))
+    result = cur.fetchone()
+    conn.close()
+    return result
 
 def update_click_count(conn, short_code):
     c = conn.cursor()
