@@ -1,9 +1,11 @@
-from flask import Flask, request, redirect
+from flask import Flask, request, redirect 
+from flask_cors import CORS
 from threading import Lock
 from database.db import create_connection, create_table, insert_url, get_url, update_click_count
 from utils.url_shortener import generate_short_code
 
 app = Flask(__name__)
+CORS(app)
 MAX_CLICKS = 3000
 db_lock = Lock()
 
@@ -13,6 +15,7 @@ def home():
 
 @app.route('/shorten_link', methods=['POST'])
 def shorten_url():
+    print("POST REQUEST")
     original_url = request.form['url']
     print(f'url inserted: {original_url}')
     short_code = generate_short_code()
